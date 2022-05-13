@@ -1,9 +1,7 @@
 from collections import defaultdict
 import torch
 from transformers import ViltProcessor, ViltForQuestionAnswering
-import requests
-from PIL import Image
-from vqa_data import VqaDataset
+from vqa_data import VQA2
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import json
@@ -42,8 +40,8 @@ def default_collate(batch):
 
     return image, question, answer, question_id
 
-
-device = torch.device('cuda:0')
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+print('Using device:', device)
 
 dataset_config = dict(
     versionType = "v2_",
@@ -55,7 +53,7 @@ dataset_config = dict(
 ans_class_idxs_all = []
 question_ids_all = []
 
-vqa_dataset = VqaDataset(**dataset_config)
+vqa_dataset = VQA2(**dataset_config)
 dataloader = DataLoader(vqa_dataset, batch_size=5, shuffle=False, num_workers=0, collate_fn=default_collate)
 
 processor = ViltProcessor.from_pretrained("dandelin/vilt-b32-finetuned-vqa")
