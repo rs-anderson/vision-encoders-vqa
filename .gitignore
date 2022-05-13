@@ -4,3 +4,5 @@ Questions/
 QuestionTypes/
 Results/
 venv/
+
+__pycache__/
