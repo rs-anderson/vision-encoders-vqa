@@ -50,7 +50,7 @@ dataset_config = dict(
     versionType = "v2_",
     taskType = "OpenEnded",
     dataType = "mscoco",
-    dataSubType = "val2014",
+    dataSubType = "train2014",
 )
 
 ans_class_idxs_all = []
