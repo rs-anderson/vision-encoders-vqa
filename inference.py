@@ -8,7 +8,6 @@ import json
 from paths import BASEDIR
 
 
-
 def default_collate(batch):
     """
     Override `default_collate` https://pytorch.org/docs/stable/_modules/torch/utils/data/dataloader.html#DataLoader
@@ -60,9 +59,8 @@ processor = ViltProcessor.from_pretrained("dandelin/vilt-b32-finetuned-vqa")
 model = ViltForQuestionAnswering.from_pretrained("dandelin/vilt-b32-finetuned-vqa").to(device)
 
 for i, (images, questions, answers, question_ids) in enumerate(tqdm(dataloader)):
-    # prepare inputs
     
-    # import ipdb; ipdb.set_trace()
+    # prepare inputs
     encoding = processor(images, questions, return_tensors="pt", padding=True)
 
     # forward pass
@@ -86,5 +84,4 @@ results = [
 
 json_results = json.dumps(results)
 with open(BASEDIR / "Results" / f"{dataset_config['dataSubType']}.json", "w") as results_file:
-    # results_file.write(json_results)
     json.dump(results, results_file)
