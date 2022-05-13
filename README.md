@@ -8,5 +8,5 @@ python dowload_data.py
 
 ## 2. Extract the zipped files to their respective directories.
 ```
-extract_data_to_files.sh
+extract_data_to_dirs.sh
 ```
