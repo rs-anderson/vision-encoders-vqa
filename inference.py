@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import json
 from paths import BASEDIR
+import wandb
 
 
 def default_collate(batch):
@@ -42,6 +43,9 @@ def default_collate(batch):
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print('Using device:', device)
 
+wandb.init(project="VQA2.0-baseline")
+config = wandb.config
+
 dataset_config = dict(
     versionType = "v2_",
     taskType = "OpenEnded",
@@ -55,20 +59,22 @@ question_ids_all = []
 
 print("Loading data...")
 vqa_dataset = VQA2(**dataset_config)
-dataloader = DataLoader(vqa_dataset, batch_size=5, shuffle=False, num_workers=0, collate_fn=default_collate)
+dataloader = DataLoader(vqa_dataset, batch_size=128, shuffle=False, num_workers=8, collate_fn=default_collate)
 
 print("Loading models...")
 processor = ViltProcessor.from_pretrained("dandelin/vilt-b32-finetuned-vqa")
 model = ViltForQuestionAnswering.from_pretrained("dandelin/vilt-b32-finetuned-vqa").to(device)
 
+wandb.watch(model)
+
 print("Starting inference...")
 for i, (images, questions, question_ids, answers) in enumerate(tqdm(dataloader)):
-
+    
     # prepare inputs
-    encoding = processor(images, questions, return_tensors="pt", padding=True)
+    encoding = processor(images, questions, return_tensors="pt", padding=True).to(device)
 
     # forward pass
-    outputs = model(**encoding.to(device))
+    outputs = model(**encoding)
     ans_class_idxs_batch = outputs.logits.argmax(-1)
     ans_class_idxs_all.append(ans_class_idxs_batch)
     question_ids_all.append(question_ids)

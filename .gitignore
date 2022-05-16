@@ -4,5 +4,6 @@ Questions/
 QuestionTypes/
 Results/
 venv/
+wandb/
 
 __pycache__/

@@ -16,19 +16,21 @@ import os
 versionType ='v2_' # this should be '' when using VQA v2.0 dataset
 taskType    ='OpenEnded' # 'OpenEnded' only for v2.0. 'OpenEnded' or 'MultipleChoice' for v1.0
 dataType    ='mscoco'  # 'mscoco' only for v1.0. 'mscoco' for real and 'abstract_v002' for abstract for v1.0. 
-dataSubType ='train2014'
+dataSubType ='val2014'
 annFile     ='%s/Annotations/%s%s_%s_annotations.json'%(BASEDIR, versionType, dataType, dataSubType)
 quesFile    ='%s/Questions/%s%s_%s_%s_questions.json'%(BASEDIR, versionType, taskType, dataType, dataSubType)
 imgDir      ='%s/Images/%s/%s/' %(BASEDIR, dataType, dataSubType)
 resultType  ='fake'
 fileTypes   = ['results', 'accuracy', 'evalQA', 'evalQuesType', 'evalAnsType'] 
 
+RESULTS_DIR = BASEDIR / 'Results'
+
 # An example result json file has been provided in './Results' folder.  
 
 # [resFile, accuracyFile, evalQAFile, evalQuesTypeFile, evalAnsTypeFile] = ['%s/Results/%s%s_%s_%s_%s_%s.json'%(BASEDIR, versionType, taskType, dataType, dataSubType, \
 # resultType, fileType) for fileType in fileTypes]  
 
-resFile = ""
+resFile = RESULTS_DIR / f"{dataSubType}.json"
 
 # create vqa object and vqaRes object
 vqa = VQA(annFile, quesFile)
@@ -74,19 +76,23 @@ if len(evals) > 0:
 		I = io.imread(imgDir + imgFilename)
 		plt.imshow(I)
 		plt.axis('off')
-		plt.show()
+		plt.savefig(RESULTS_DIR / "incorrect_ans.png")
 
 # plot accuracy for various question types
+plt.figure()
 plt.bar(range(len(vqaEval.accuracy['perQuestionType'])), vqaEval.accuracy['perQuestionType'].values(), align='center')
 plt.xticks(range(len(vqaEval.accuracy['perQuestionType'])), vqaEval.accuracy['perQuestionType'].keys(), rotation='0',fontsize=10)
 plt.title('Per Question Type Accuracy', fontsize=10)
 plt.xlabel('Question Types', fontsize=10)
 plt.ylabel('Accuracy', fontsize=10)
-plt.show()
+plt.savefig(RESULTS_DIR / "accuracy_by_question.png")
+
+fileTypes   = ['accuracy', 'evalQA', 'evalQuesType', 'evalAnsType'] 
+[accuracyFile, evalQAFile, evalQuesTypeFile, evalAnsTypeFile] = [RESULTS_DIR / f"{dataSubType}_{fileType}.json" for fileType in fileTypes] 
 
 # save evaluation results to ./Results folder
-json.dump(vqaEval.accuracy,     open(accuracyFile,     'w'))
-json.dump(vqaEval.evalQA,       open(evalQAFile,       'w'))
+json.dump(vqaEval.accuracy, open(accuracyFile, 'w'))
+json.dump(vqaEval.evalQA, open(evalQAFile, 'w'))
 json.dump(vqaEval.evalQuesType, open(evalQuesTypeFile, 'w'))
-json.dump(vqaEval.evalAnsType,  open(evalAnsTypeFile,  'w'))
+json.dump(vqaEval.evalAnsType, open(evalAnsTypeFile, 'w'))
 
