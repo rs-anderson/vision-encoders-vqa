@@ -37,7 +37,7 @@ def default_collate(batch):
     answer = [item[2] for item in batch]
     question_id = [item[3] for item in batch]
 
-    return image, question, answer, question_id
+    return image, question, question_id, answer
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print('Using device:', device)
@@ -47,19 +47,23 @@ dataset_config = dict(
     taskType = "OpenEnded",
     dataType = "mscoco",
     dataSubType = "val2014",
+    split = "val"
 )
 
 ans_class_idxs_all = []
 question_ids_all = []
 
+print("Loading data...")
 vqa_dataset = VQA2(**dataset_config)
 dataloader = DataLoader(vqa_dataset, batch_size=5, shuffle=False, num_workers=0, collate_fn=default_collate)
 
+print("Loading models...")
 processor = ViltProcessor.from_pretrained("dandelin/vilt-b32-finetuned-vqa")
 model = ViltForQuestionAnswering.from_pretrained("dandelin/vilt-b32-finetuned-vqa").to(device)
 
-for i, (images, questions, answers, question_ids) in enumerate(tqdm(dataloader)):
-    
+print("Starting inference...")
+for i, (images, questions, question_ids, answers) in enumerate(tqdm(dataloader)):
+
     # prepare inputs
     encoding = processor(images, questions, return_tensors="pt", padding=True)
 
